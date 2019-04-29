@@ -6,7 +6,7 @@ from tkinter import *
 from vlc import VLC
 from darknet.darknet import detect
 
-locs = [1]
+locs = []
 FILENAME = "WatchtowerOfTurkey.MKV"
 #FILENAME = "TownCentreXVID.avi"
 #FILENAME = 0
@@ -29,9 +29,15 @@ idx = 0
 oldDrawnIdx = 0
 
 print(FPS)
-def add_buttons():
+
+def loop():
     global idx
     global oldDrawnIdx
+
+    
+    currPlaying = vlc.getCurrPlaying()
+    currPlayingStr.set(currPlaying) 
+
     start = time.time()
     ret, frame = cap.read()
     r = detect(np.array(frame))
@@ -47,18 +53,17 @@ def add_buttons():
     for i in locs[oldDrawnIdx:]:
         Button(main, text=str(i), command=lambda j=i: vlc.seek(int(i/FPS))).pack()
     oldDrawnIdx = len(locs)
-    main.after(1, add_buttons)
+    main.after(1, loop)
 
-    # search for "Add Buttons" Button object and change text and function 
-    #for child in main.winfo_children():
-    #    if child.cget('text') == 'Add Buttons':
-    #         child.config(text='Delete all buttons')
-    #         child.config(command=delete_buttons)
 
 main = Tk()
+main.geometry("640x480")
 main.title("VLC Search by attributes")
-Button(main,text='Add Buttons', command=add_buttons).pack()
-main.after(1000, add_buttons)
+currPlayingStr = StringVar()
+label = Label( main, textvariable=currPlayingStr, relief=RAISED )
+label.pack()
+
+main.after(500, loop)
 main.mainloop()
 
 

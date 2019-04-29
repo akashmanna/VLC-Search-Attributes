@@ -44,6 +44,12 @@ class VLC:
         except:
             print("Failed to send cmd\n")
 
+    def getCurrPlaying(self):
+        self.send('get_title')
+        info = self.vlcSock.read_until(b"\n")
+        #print(info)
+        return info
+
     def pause(self):
         self.send('pause')
 
