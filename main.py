@@ -23,23 +23,36 @@ time.sleep(1)
 
 
 
-cap = cv2.VideoCapture(FILENAME)
-FPS=cap.get(cv2.CAP_PROP_FPS)
+cap = None
+FILENAME = "" 
 idx = 0
 oldDrawnIdx = 0
-
-print(FPS)
 
 def loop():
     global idx
     global oldDrawnIdx
-
+    global cap
+    global FILENAME
     
-    currPlaying = vlc.getCurrPlaying()
+    currPlaying = vlc.getCurrPlaying().decode('utf-8')[2:].strip()
     currPlayingStr.set(currPlaying) 
+
+
+    if(FILENAME!=currPlaying):
+        FILENAME = currPlaying
+        print(currPlaying)
+        cap = cv2.VideoCapture(str(currPlaying))
+        FPS=cap.get(cv2.CAP_PROP_FPS)
+        idx = 0
+        oldDrawnIdx = 0
+        
 
     start = time.time()
     ret, frame = cap.read()
+    #print("Ret: ", ret)
+    if( not ret ):
+        main.after(1, loop)
+        return
     r = detect(np.array(frame))
     #print("Time for detection: ", 1000*(time.time()-start))
     for i in r:
@@ -47,6 +60,7 @@ def loop():
             locs.append(idx)
 
     #print(locs)
+    print(idx)
 
     idx += 1
     # Add buttons
