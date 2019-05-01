@@ -20,6 +20,7 @@ class GUI:
         self.idx = 0
         self.oldDrawnIdx = 0
         self.cap = None
+        self.FPS = 0
         self.FILENAME = ""
         self.locs = []
 
@@ -46,7 +47,7 @@ class GUI:
             self.FILENAME = currPlaying
             print(currPlaying)
             self.cap = cv2.VideoCapture(str(currPlaying))
-            FPS=self.cap.get(cv2.CAP_PROP_FPS)
+            self.FPS=self.cap.get(cv2.CAP_PROP_FPS)
             self.idx = 0
             self.oldDrawnIdx = 0
             
@@ -69,7 +70,7 @@ class GUI:
         self.idx += 1
         # Add buttons
         for i in self.locs[self.oldDrawnIdx:]:
-            Button(self.GUIapp, text=str(i), command=lambda j=i: vlc.seek(int(i/FPS))).pack()
+            Button(self.GUIapp, text=str(i), command=lambda j=i: vlc.seek(int(i/self.FPS))).pack()
         self.oldDrawnIdx = len(self.locs)
         self.GUIapp.after(1, self.loopfunction)
 
