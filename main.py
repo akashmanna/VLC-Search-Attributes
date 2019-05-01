@@ -27,8 +27,8 @@ class GUI:
         self.GUIapp = Tk()
         self.GUIapp.geometry("640x480")
         self.GUIapp.title("VLC Search by attributes")
-        currPlayingStr = StringVar()
-        label = Label( self.GUIapp, textvariable=currPlayingStr, relief=RAISED )
+        self.currPlayingStr = StringVar()
+        label = Label( self.GUIapp, textvariable=self.currPlayingStr, relief=RAISED )
         label.pack()
 
         self.GUIapp.after(500, self.loopfunction)
@@ -39,7 +39,7 @@ class GUI:
     def loopfunction(self):
         
         currPlaying = vlc.getCurrPlaying().decode('utf-8')[2:].strip()
-        currPlayingStr.set(currPlaying) 
+        self.currPlayingStr.set(currPlaying) 
 
 
         if(self.FILENAME!=currPlaying):
@@ -55,7 +55,7 @@ class GUI:
         ret, frame = self.cap.read()
         #print("Ret: ", ret)
         if( not ret ):
-            main.after(1, loop)
+            self.GUIapp.after(1, self.loopfunction)
             return
         r = detect(np.array(frame))
         #print("Time for detection: ", 1000*(time.time()-start))
@@ -69,9 +69,9 @@ class GUI:
         self.idx += 1
         # Add buttons
         for i in self.locs[self.oldDrawnIdx:]:
-            Button(main, text=str(i), command=lambda j=i: vlc.seek(int(i/FPS))).pack()
+            Button(self.GUIapp, text=str(i), command=lambda j=i: vlc.seek(int(i/FPS))).pack()
         self.oldDrawnIdx = len(self.locs)
-        main.after(1, loop)
+        self.GUIapp.after(1, self.loopfunction)
 
 
 vlc = VLC()
