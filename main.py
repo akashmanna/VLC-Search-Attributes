@@ -13,6 +13,67 @@ FILENAME = "WatchtowerOfTurkey.MKV"
 SEARCHTERM = b"person"
 
 
+class GUI:
+
+    def __init__(self):
+    
+        self.idx = 0
+        self.oldDrawnIdx = 0
+        self.cap = None
+        self.FILENAME = ""
+        self.locs = []
+
+
+        self.GUIapp = Tk()
+        self.GUIapp.geometry("640x480")
+        self.GUIapp.title("VLC Search by attributes")
+        currPlayingStr = StringVar()
+        label = Label( self.GUIapp, textvariable=currPlayingStr, relief=RAISED )
+        label.pack()
+
+        self.GUIapp.after(500, self.loopfunction)
+        self.GUIapp.mainloop()
+            
+
+
+    def loopfunction(self):
+        
+        currPlaying = vlc.getCurrPlaying().decode('utf-8')[2:].strip()
+        currPlayingStr.set(currPlaying) 
+
+
+        if(self.FILENAME!=currPlaying):
+            self.FILENAME = currPlaying
+            print(currPlaying)
+            self.cap = cv2.VideoCapture(str(currPlaying))
+            FPS=self.cap.get(cv2.CAP_PROP_FPS)
+            self.idx = 0
+            self.oldDrawnIdx = 0
+            
+
+        start = time.time()
+        ret, frame = self.cap.read()
+        #print("Ret: ", ret)
+        if( not ret ):
+            main.after(1, loop)
+            return
+        r = detect(np.array(frame))
+        #print("Time for detection: ", 1000*(time.time()-start))
+        for i in r:
+            if i[0]==SEARCHTERM:
+                self.locs.append(self.idx)
+
+        #print(self.locs)
+        print(self.idx)
+
+        self.idx += 1
+        # Add buttons
+        for i in self.locs[self.oldDrawnIdx:]:
+            Button(main, text=str(i), command=lambda j=i: vlc.seek(int(i/FPS))).pack()
+        self.oldDrawnIdx = len(self.locs)
+        main.after(1, loop)
+
+
 vlc = VLC()
 time.sleep(1)
 vlc.add(FILENAME)
@@ -20,69 +81,6 @@ time.sleep(1)
 vlc.play()
 time.sleep(1)
 
+mainApp = GUI()
 
 
-
-cap = None
-FILENAME = "" 
-idx = 0
-oldDrawnIdx = 0
-
-def loop():
-    global idx
-    global oldDrawnIdx
-    global cap
-    global FILENAME
-    
-    currPlaying = vlc.getCurrPlaying().decode('utf-8')[2:].strip()
-    currPlayingStr.set(currPlaying) 
-
-
-    if(FILENAME!=currPlaying):
-        FILENAME = currPlaying
-        print(currPlaying)
-        cap = cv2.VideoCapture(str(currPlaying))
-        FPS=cap.get(cv2.CAP_PROP_FPS)
-        idx = 0
-        oldDrawnIdx = 0
-        
-
-    start = time.time()
-    ret, frame = cap.read()
-    #print("Ret: ", ret)
-    if( not ret ):
-        main.after(1, loop)
-        return
-    r = detect(np.array(frame))
-    #print("Time for detection: ", 1000*(time.time()-start))
-    for i in r:
-        if i[0]==SEARCHTERM:
-            locs.append(idx)
-
-    #print(locs)
-    print(idx)
-
-    idx += 1
-    # Add buttons
-    for i in locs[oldDrawnIdx:]:
-        Button(main, text=str(i), command=lambda j=i: vlc.seek(int(i/FPS))).pack()
-    oldDrawnIdx = len(locs)
-    main.after(1, loop)
-
-
-main = Tk()
-main.geometry("640x480")
-main.title("VLC Search by attributes")
-currPlayingStr = StringVar()
-label = Label( main, textvariable=currPlayingStr, relief=RAISED )
-label.pack()
-
-main.after(500, loop)
-main.mainloop()
-
-
-print(locs)
-
-vlc.seek(int(locs[0]/FPS))
-time.sleep(1)
-time.sleep(1)
