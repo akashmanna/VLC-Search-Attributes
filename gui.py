@@ -16,7 +16,7 @@ class GUI:
         self.cap = None
         self.FPS = 0
         self.FILENAME = ""
-        self.SEARCHTERM = b'person'
+        self.SEARCHTERM = b''
         self.locs = []
 
 
@@ -30,8 +30,8 @@ class GUI:
         label = Label( self.GUIapp, textvariable=self.currPlayingStr, relief=RAISED )
         label.pack()
 
-        textBox=Text(self.GUIapp, height=2, width=10)
-        textBox.pack()
+        self.textBox=Text(self.GUIapp, height=2, width=10)
+        self.textBox.pack()
 
         Button(self.GUIapp, text="SEARCH", command=self.searchInit).pack()
 
@@ -40,6 +40,7 @@ class GUI:
 
     def searchInit(self):
         print("Search INIT")
+        self.SEARCHTERM=self.textBox.get("1.0","end-1c").encode()
             
     
     def loopfunction(self):
