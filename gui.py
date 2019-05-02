@@ -21,7 +21,7 @@ class GUI:
 
 
         self.vlc = VLC()
-        time.sleep(1)
+        #time.sleep(1)
 
         self.GUIapp = Tk()
         self.GUIapp.geometry("640x480")
@@ -30,8 +30,16 @@ class GUI:
         label = Label( self.GUIapp, textvariable=self.currPlayingStr, relief=RAISED )
         label.pack()
 
+        textBox=Text(self.GUIapp, height=2, width=10)
+        textBox.pack()
+
+        Button(self.GUIapp, text="SEARCH", command=self.searchInit).pack()
+
         self.GUIapp.after(500, self.loopfunction)
         self.GUIapp.mainloop()
+
+    def searchInit(self):
+        print("Search INIT")
             
     
     def loopfunction(self):
@@ -40,7 +48,7 @@ class GUI:
             self.FILENAME = currPlaying
             print(currPlaying)
             if not os.path.isfile(currPlaying):
-                time.sleep(1)
+                #time.sleep(1)
                 self.GUIapp.after(1, self.loopfunction)
                 return
 
@@ -51,7 +59,7 @@ class GUI:
             self.oldDrawnIdx = 0
 
         if not os.path.isfile(currPlaying):
-            time.sleep(1)
+            #time.sleep(1)
             self.GUIapp.after(1, self.loopfunction)
             return 
 
