@@ -20,9 +20,10 @@ class GUI:
         self.SEARCHTERM = b''
         self.locs = []
 
-
         self.vlc = VLC()
         #time.sleep(1)
+
+        self.tracker = tracker()
 
         self.GUIapp = Tk()
         self.GUIapp.geometry("640x480")
@@ -71,6 +72,8 @@ class GUI:
             self.GUIapp.after(1, self.loopfunction)
             return 
         r = detect(np.array(frame))
+        print("r: ", r)
+        r = self.tracker.track(frame, r)
         #print("Time for detection: ", 1000*(time.time()-start))
         for i in r:
             if i[0]==self.SEARCHTERM:

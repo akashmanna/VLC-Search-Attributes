@@ -7,22 +7,6 @@ from deep_sort.detection import Detection as ddet
 
 
 def gdet(encoder, mot_dir, output_dir, detection_dir=None):
-    """Generate detections with features.
-    Parameters
-    ----------
-    encoder : Callable[image, ndarray] -> ndarray
-        The encoder function takes as input a BGR color image and a matrix of
-        bounding boxes in format `(x, y, w, h)` and returns a matrix of
-        corresponding feature vectors.
-    mot_dir : str
-        Path to the MOTChallenge directory (can be either train or test).
-    output_dir
-        Path to the output directory. Will be created if it does not exist.
-    detection_dir
-        Path to custom detections. The directory structure should be the default
-        MOTChallenge structure: `[sequence]/det/det.txt`. If None, uses the
-        standard MOTChallenge detections.
-    """
     if detection_dir is None:
         detection_dir = mot_dir
     try:
@@ -31,20 +15,16 @@ def gdet(encoder, mot_dir, output_dir, detection_dir=None):
         if exception.errno == errno.EEXIST and os.path.isdir(output_dir):
             pass
         else:
-            raise ValueError(
-                "Failed to created output directory '%s'" % output_dir)
+            raise ValueError("Failed to created output directory '%s'" % output_dir)
 
     for sequence in os.listdir(mot_dir):
         print("Processing %s" % sequence)
         sequence_dir = os.path.join(mot_dir, sequence)
 
         image_dir = os.path.join(sequence_dir, "img1")
-        image_filenames = {
-            int(os.path.splitext(f)[0]): os.path.join(image_dir, f)
-            for f in os.listdir(image_dir)}
+        image_filenames = {int(os.path.splitext(f)[0]): os.path.join(image_dir, f) for f in os.listdir(image_dir)}
 
-        detection_file = os.path.join(
-            detection_dir, sequence, "det/det.txt")
+        detection_file = os.path.join(detection_dir, sequence, "det/det.txt")
         detections_in = np.loadtxt(detection_file, delimiter=',')
         detections_out = []
 
@@ -59,18 +39,15 @@ def gdet(encoder, mot_dir, output_dir, detection_dir=None):
             if frame_idx not in image_filenames:
                 print("WARNING could not find image for frame %d" % frame_idx)
                 continue
-            bgr_image = cv2.imread(
-                image_filenames[frame_idx], cv2.IMREAD_COLOR)
+            bgr_image = cv2.imread(image_filenames[frame_idx], cv2.IMREAD_COLOR)
             features = encoder(bgr_image, rows[:, 2:6].copy())
-            detections_out += [np.r_[(row, feature)] for row, feature
-                               in zip(rows, features)]
+            detections_out += [np.r_[(row, feature)] for row, feature in zip(rows, features)]
 
         output_filename = os.path.join(output_dir, "%s.npy" % sequence)
-        np.save(
-            output_filename, np.asarray(detections_out), allow_pickle=False)
+        np.save( output_filename, np.asarray(detections_out), allow_pickle=False)
+
 
 class tracker:
-
     def __init__(self):
         # Definition of the parameters
         max_cosine_distance = 0.3
@@ -102,5 +79,5 @@ class tracker:
             if track.track_id not in self.trackedIDs:
                 self.trackedIDs[ track.track_id ] = 1
                 retVal.append( track.track_id )
-
         return retVal
+
