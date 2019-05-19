@@ -4,47 +4,9 @@ from deep_sort.detection import Detection
 from deep_sort.tracker import Tracker
 from deep_sort.detection import Detection as ddet
 
+import generate_detections as gdet
 
 
-def gdet(encoder, mot_dir, output_dir, detection_dir=None):
-    if detection_dir is None:
-        detection_dir = mot_dir
-    try:
-        os.makedirs(output_dir)
-    except OSError as exception:
-        if exception.errno == errno.EEXIST and os.path.isdir(output_dir):
-            pass
-        else:
-            raise ValueError("Failed to created output directory '%s'" % output_dir)
-
-    for sequence in os.listdir(mot_dir):
-        print("Processing %s" % sequence)
-        sequence_dir = os.path.join(mot_dir, sequence)
-
-        image_dir = os.path.join(sequence_dir, "img1")
-        image_filenames = {int(os.path.splitext(f)[0]): os.path.join(image_dir, f) for f in os.listdir(image_dir)}
-
-        detection_file = os.path.join(detection_dir, sequence, "det/det.txt")
-        detections_in = np.loadtxt(detection_file, delimiter=',')
-        detections_out = []
-
-        frame_indices = detections_in[:, 0].astype(np.int)
-        min_frame_idx = frame_indices.astype(np.int).min()
-        max_frame_idx = frame_indices.astype(np.int).max()
-        for frame_idx in range(min_frame_idx, max_frame_idx + 1):
-            print("Frame %05d/%05d" % (frame_idx, max_frame_idx))
-            mask = frame_indices == frame_idx
-            rows = detections_in[mask]
-
-            if frame_idx not in image_filenames:
-                print("WARNING could not find image for frame %d" % frame_idx)
-                continue
-            bgr_image = cv2.imread(image_filenames[frame_idx], cv2.IMREAD_COLOR)
-            features = encoder(bgr_image, rows[:, 2:6].copy())
-            detections_out += [np.r_[(row, feature)] for row, feature in zip(rows, features)]
-
-        output_filename = os.path.join(output_dir, "%s.npy" % sequence)
-        np.save( output_filename, np.asarray(detections_out), allow_pickle=False)
 
 
 class tracker:
@@ -59,6 +21,7 @@ class tracker:
         metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
         self.tracker = Tracker(metric)
         self.trackedIDs = {}
+        self.tracedIDtoLabels = {}
 
     def track(frame, boxs):
         features = encoder(frame,boxs)
@@ -78,6 +41,7 @@ class tracker:
             bbox = track.to_tlbr()
             if track.track_id not in self.trackedIDs:
                 self.trackedIDs[ track.track_id ] = 1
+                
                 retVal.append( track.track_id )
         return retVal
 
