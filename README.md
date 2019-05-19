@@ -14,3 +14,7 @@ results.
 $ wget https://pjreddie.com/media/files/yolov3-tiny.weights ./darknet/
 $ python main.py
 ``` 
+
+### TO-DOs:
+[ ] Display image for all results
+[ ] WRITE A BETTER README THAT ACTUALLY EXPLAINS STUFF
