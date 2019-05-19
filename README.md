@@ -16,5 +16,5 @@ $ python main.py
 ``` 
 
 ### TO-DOs:
-[ ] Display image for all results
-[ ] WRITE A BETTER README THAT ACTUALLY EXPLAINS STUFF
+- [ ] Display image for all results
+- [ ] WRITE A BETTER README THAT ACTUALLY EXPLAINS STUFF
