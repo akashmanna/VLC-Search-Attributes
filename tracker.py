@@ -23,7 +23,9 @@ class tracker:
         self.trackedIDs = {}
         self.tracedIDtoLabels = {}
 
-    def track(self, frame, boxs):
+    def track(self, frame, dknetBoxs):
+        boxs = [list(i[2]) for i in dknetBoxs]
+        labels = [i for i in dknetBoxs]
         features = self.encoder(frame,boxs)
         detections = [Detection(bbox, 1.0, feature) for bbox, feature in zip(boxs, features)]    
         # Run non-maxima suppression.
@@ -31,9 +33,10 @@ class tracker:
         scores = np.array([d.confidence for d in detections])
         indices = preprocessing.non_max_suppression(boxes, self.nms_max_overlap, scores)
         detections = [detections[i] for i in indices]
+        print("Detections: ", detections)
         # Call the traccker
         self.tracker.predict()
-        self.tracker.update(detections)
+        self.tracker.update(detections, labels)
         retVal = []
         for track in self.tracker.tracks:
             if not track.is_confirmed() or track.time_since_update > 1:
@@ -42,6 +45,6 @@ class tracker:
             if track.track_id not in self.trackedIDs:
                 self.trackedIDs[ track.track_id ] = 1
                 
-                retVal.append( track.track_id )
+                retVal.append( track.label )
         return retVal
 

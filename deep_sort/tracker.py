@@ -35,8 +35,7 @@ class Tracker:
     tracks : List[Track]
         The list of active tracks at the current time step.
 
-    """
-
+    """ 
     def __init__(self, metric, max_iou_distance=0.7, max_age=10, n_init=3):
         self.metric = metric
         self.max_iou_distance = max_iou_distance
@@ -56,7 +55,7 @@ class Tracker:
         for track in self.tracks:
             track.predict(self.kf)
 
-    def update(self, detections):
+    def update(self, detections, labels):
         """Perform measurement update and track management.
 
         Parameters
@@ -76,7 +75,7 @@ class Tracker:
         for track_idx in unmatched_tracks:
             self.tracks[track_idx].mark_missed()
         for detection_idx in unmatched_detections:
-            self._initiate_track(detections[detection_idx])
+            self._initiate_track(detections[detection_idx], labels[detection_idx])
         
         self.deleted = [t for t in self.tracks if t.is_deleted()]
         self.tracks = [t for t in self.tracks if not t.is_deleted()]
@@ -134,9 +133,9 @@ class Tracker:
         unmatched_tracks = list(set(unmatched_tracks_a + unmatched_tracks_b))
         return matches, unmatched_tracks, unmatched_detections
 
-    def _initiate_track(self, detection):
+    def _initiate_track(self, detection, label):
         mean, covariance = self.kf.initiate(detection.to_xyah())
-        self.tracks.append(Track(
+        self.tracks.append(Track(label,
             mean, covariance, self._next_id, self.n_init, self.max_age,
             detection.feature))
         self._next_id += 1

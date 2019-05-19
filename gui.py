@@ -72,9 +72,9 @@ class GUI:
             self.GUIapp.after(1, self.loopfunction)
             return 
         dknetF = detect(np.array(frame))
-        dknetF_r = [list(i[2]) for i in dknetF]
-        print("r: ", dknetF_r)
-        r = self.tracker.track(frame, dknetF_r)
+        #dknetF_r = [list(i[2]) for i in dknetF]
+        #print("r: ", dknetF_r)
+        r = self.tracker.track(frame, dknetF)
         #print("Time for detection: ", 1000*(time.time()-start))
         for i in r:
             if i[0]==self.SEARCHTERM:
